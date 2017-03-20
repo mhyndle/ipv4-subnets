@@ -127,22 +127,22 @@ class Subnet extends SubnetCalculator {
 
     private function firstIpIsLowerThan(string $ip) : bool
     {
-        return self::ipIsLowerThan($this->getIPAddress(), $ip);
+        return IPTools::ipIsLowerThan($this->getIPAddress(), $ip);
     }
 
     private function broadcastIpIsLowerThan(string $ip) : bool
     {
-        return self::ipIsLowerThan($this->getBroadcastAddress(), $ip);
+        return IPTools::ipIsLowerThan($this->getBroadcastAddress(), $ip);
     }
 
     private function firstIpIsGreaterThan(string $ip) : bool
     {
-        return !(self::ipIsLowerThan($this->getIPAddress(), $ip) || $this->firstIpIsEqual($ip));
+        return !(IPTools::ipIsLowerThan($this->getIPAddress(), $ip) || $this->firstIpIsEqual($ip));
     }
 
     private function broadcastIpIsGreaterThan(string $ip) : bool
     {
-        return !(self::ipIsLowerThan($this->getBroadcastAddress(), $ip) || $this->broadcastIpIsEqual($ip));
+        return !(IPTools::ipIsLowerThan($this->getBroadcastAddress(), $ip) || $this->broadcastIpIsEqual($ip));
     }
 
     private function firstIpIsLowerOrEqual(string $ip) : bool
@@ -163,43 +163,6 @@ class Subnet extends SubnetCalculator {
     private function broadcastIpIsGreaterOrEqual(string $ip) : bool
     {
         return ($this->broadcastIpIsGreaterThan($ip) || $this->firstIpIsEqual($ip));
-    }
-
-    static private function ipIsLowerThan(string $ip1, string $ip2) : bool
-    {
-        $quads = self::getIpQuads($ip1);
-        $comparisonQuads = self::getIpQuads($ip2);
-
-        if ($quads[0] < $comparisonQuads[0]) {
-            return true;
-        } elseif ($quads[0] > $comparisonQuads[0]) {
-            return false;
-        }
-
-        if ($quads[1] < $comparisonQuads[1]) {
-            return true;
-        } elseif ($quads[1] > $comparisonQuads[1]) {
-            return false;
-        }
-
-        if ($quads[2] < $comparisonQuads[2]) {
-            return true;
-        } elseif ($quads[2] > $comparisonQuads[2]) {
-            return false;
-        }
-
-        if ($quads[3] < $comparisonQuads[3]) {
-            return true;
-        } elseif ($quads[3] > $comparisonQuads[3]) {
-            return false;
-        }
-
-        return false;
-    }
-
-    static private function getIpQuads(string $ip) : array
-    {
-        return explode('.', $ip);
     }
 
     /**
