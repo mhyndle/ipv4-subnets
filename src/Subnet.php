@@ -14,9 +14,16 @@ class Subnet extends SubnetCalculator {
      */
     private $customData = [];
 
-    public function __construct($ip, $network_size, array $customData = [])
+    /**
+     * Subnet constructor.
+     *
+     * @param string $ip
+     * @param string|int $networkSize
+     * @param array $customData
+     */
+    public function __construct(string $ip, $networkSize, array $customData = [])
     {
-        parent::__construct($ip, $network_size);
+        parent::__construct($ip, $networkSize);
         $this->setCustomData($customData);
     }
 

@@ -18,6 +18,11 @@ class DistinctSubnets {
      */
     private $overlappingSubnetsCollection;
 
+    /**
+     * DistinctSubnets constructor.
+     *
+     * @param Subnet[] $subnets
+     */
     public function __construct(array $subnets = [])
     {
         $this->overlappingSubnetsCollection = new OverlappingSubnetsCollection();
