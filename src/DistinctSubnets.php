@@ -27,6 +27,12 @@ class DistinctSubnets {
         }
     }
 
+    /**
+     * Creates and returns DistinctSubnet object built from array of CIDR adresses.
+     *
+     * @param string[] $CIDRs
+     * @return DistinctSubnets
+     */
     static public function createFromCIDRs(array $CIDRs = [])
     {
         $subnets = [];
@@ -38,12 +44,23 @@ class DistinctSubnets {
         return new self($subnets);
     }
 
+    /**
+     * Adds Subnet to the collection.
+     *
+     * @param Subnet $subnet
+     */
     public function add(Subnet $subnet)
     {
         $this->inputSubnets[$subnet->getIndex()] = $subnet;
         $this->classifySubnet($subnet);
     }
 
+    /**
+     * Adds
+     *
+     * @param string $CIDR
+     * @param array $customData custom data that will be added to the Subnet object
+     */
     public function addFromCIDR(string $CIDR, array $customData = [])
     {
         $this->add(Subnet::createFromCidr($CIDR, $customData));
@@ -109,16 +126,31 @@ class DistinctSubnets {
 
     }
 
+    /**
+     * Returns array of subnets that are distinct and are not overlapping with any other subnet added to collection.
+     *
+     * @return Subnet[]
+     */
     public function getDistinctSubnets() : array
     {
         return $this->distinctSubnets;
     }
 
+    /**
+     * Returns collection of subnets that are overlapping.
+     *
+     * @return OverlappingSubnetsCollection
+     */
     public function getOverlappingSubnetsCollection() : OverlappingSubnetsCollection
     {
         return $this->overlappingSubnetsCollection;
     }
 
+    /**
+     * Returns array of distinct subnets that are fully covering all subnets added to collection.
+     *
+     * @return Subnet[]
+     */
     public function getAllDistinctSubnets() : array
     {
         $subnets = $this->getDistinctSubnets();
