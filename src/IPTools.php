@@ -22,34 +22,7 @@ class IPTools {
      */
     static public function ipIsLowerThan(string $ip1, string $ip2) : bool
     {
-        $quads = self::getIpQuads($ip1);
-        $comparisonQuads = self::getIpQuads($ip2);
-
-        if ($quads[0] < $comparisonQuads[0]) {
-            return true;
-        } elseif ($quads[0] > $comparisonQuads[0]) {
-            return false;
-        }
-
-        if ($quads[1] < $comparisonQuads[1]) {
-            return true;
-        } elseif ($quads[1] > $comparisonQuads[1]) {
-            return false;
-        }
-
-        if ($quads[2] < $comparisonQuads[2]) {
-            return true;
-        } elseif ($quads[2] > $comparisonQuads[2]) {
-            return false;
-        }
-
-        if ($quads[3] < $comparisonQuads[3]) {
-            return true;
-        } elseif ($quads[3] > $comparisonQuads[3]) {
-            return false;
-        }
-
-        return false;
+        return IPRangeToCIDRConverter::ip_less_than($ip1, $ip2);
     }
 
     /**
@@ -58,7 +31,7 @@ class IPTools {
      * @param string $ip
      * @return string IP address in binary.
      */
-    static public function getIPAddressBinary(string $ip)
+    static public function getIPAddressBinary(string $ip) : string
     {
         return self::ipAddressCalculation($ip, '%08b');
     }
@@ -69,7 +42,7 @@ class IPTools {
      * @param string $ip
      * @return string IP address in hex.
      */
-    static public function getIPAddressHex(string $ip)
+    static public function getIPAddressHex(string $ip) : string
     {
         return self::ipAddressCalculation($ip, '%02X');
     }
@@ -82,7 +55,7 @@ class IPTools {
      * @param string $separator implode separator for formatting quads vs hex and binary.
      * @return string formatted IP address.
      */
-    static private function ipAddressCalculation($ip, $format, $separator = '')
+    static private function ipAddressCalculation($ip, $format, $separator = '') : string
     {
         return implode($separator, array_map(
             function ($x) use ($format) {
@@ -90,5 +63,31 @@ class IPTools {
             },
             self::getIpQuads($ip)
         ));
+    }
+
+    static public function getLowestIP(array $ips)
+    {
+        $lowestIP = '255.255.255.255';
+
+        foreach ($ips as $ip) {
+            if (self::ipIsLowerThan($ip, $lowestIP)) {
+                $lowestIP = $ip;
+            }
+        }
+
+        return $lowestIP;
+    }
+
+    static public function getHighestIP(array $ips)
+    {
+        $highestIP = '0.0.0.0';
+
+        foreach ($ips as $ip) {
+            if (!self::ipIsLowerThan($ip, $highestIP)) {
+                $highestIP = $ip;
+            }
+        }
+
+        return $highestIP;
     }
 }

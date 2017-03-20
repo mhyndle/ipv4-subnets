@@ -84,14 +84,28 @@ class DistinctSubnets {
              * @var $distinctOverlappingSubnet Subnet
              */
             foreach ($overlappingSubnet->getDistinctSubnets() as $distinctOverlappingSubnet) {
-                if ($subnet->within($distinctOverlappingSubnet)) {
-                    $overlappingSubnet->addCoveredSubnet($subnet);
-                    return;
-                }
-                if ($subnet->contains($distinctOverlappingSubnet)) {
-                    $overlappingSubnet->removeDistinctSubnet($distinctOverlappingSubnet);
-                    $overlappingSubnet->addDistinctSubnet($subnet);
-                    return;
+                $overlappingStatus = $subnet->overlappingStatusFor($distinctOverlappingSubnet);
+                switch ($overlappingStatus) {
+                    case Subnet::OVERLAPPING_STATUS_CONTAINS:
+                        $overlappingSubnet->removeDistinctSubnet($distinctOverlappingSubnet);
+                        $overlappingSubnet->addDistinctSubnet($subnet);
+                        return;
+                    case Subnet::OVERLAPPING_STATUS_WITHIN:
+                        $overlappingSubnet->addCoveredSubnet($subnet);
+                        return;
+                    case Subnet::OVERLAPPING_STATUS_OVERLAPPING:
+                        $lowestIp = IPTools::getLowestIP([$subnet->getIPAddress(), $distinctOverlappingSubnet->getIPAddress()]);
+                        $highestIp = IPTools::getHighestIP([$subnet->getIPAddress(), $distinctOverlappingSubnet->getIPAddress()]);
+                        $distinctCIDRs = IPRangeToCIDRConverter::ip_range_to_subnet_array($lowestIp, $highestIp);
+                        $overlappingSubnet->removeDistinctSubnet($distinctOverlappingSubnet);
+                        $overlappingSubnet->addCoveredSubnet($subnet);
+                        foreach ($distinctCIDRs as $cidr) {
+                            $overlappingSubnet->addDistinctSubnet(Subnet::createFromCidr($cidr));
+                        }
+                        return;
+                    case Subnet::OVERLAPPING_STATUS_DISTINCT:
+                    default:
+                        break;
                 }
             }
         }
@@ -119,7 +133,16 @@ class DistinctSubnets {
                     unset($this->distinctSubnets[$distinctSubnet->getIndex()]);
                     return;
                 case Subnet::OVERLAPPING_STATUS_OVERLAPPING:
-                    // TODO: add to overlapping subnets
+                    $overlappingSubnet = new OverlappingSubnets();
+                    $lowestIp = IPTools::getLowestIP([$subnet->getIPAddress(), $distinctSubnet->getIPAddress()]);
+                    $highestIp = IPTools::getHighestIP([$subnet->getIPAddress(), $distinctSubnet->getIPAddress()]);
+                    $distinctCIDRs = IPRangeToCIDRConverter::ip_range_to_subnet_array($lowestIp, $highestIp);
+                    $overlappingSubnet->removeDistinctSubnet($distinctSubnet);
+                    $overlappingSubnet->addCoveredSubnet($subnet);
+                    foreach ($distinctCIDRs as $cidr) {
+                        $overlappingSubnet->addDistinctSubnet(Subnet::createFromCidr($cidr));
+                    }
+                    unset($this->distinctSubnets[$distinctSubnet->getIndex()]);
                     return;
                 case Subnet::OVERLAPPING_STATUS_DISTINCT:
                 default:
