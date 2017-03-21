@@ -1,6 +1,11 @@
 <?php
 namespace IPv4Subnets;
 
+/**
+ * Class IPRangeToCIDRConverter provides functionality originally presented on https://www.derman.com/blogs/IP-Range-to-CIDR-Calculator
+ *
+ * @package IPv4Subnets
+ */
 class IPRangeToCIDRConverter {
     /**
      *  Convert IP address to long int, truncated to 32-bits to avoid sign extension on 64-bit platforms.
