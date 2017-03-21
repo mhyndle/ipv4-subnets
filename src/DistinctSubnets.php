@@ -190,4 +190,58 @@ class DistinctSubnets {
         return $subnets;
     }
 
+    /**
+     * Returns array of Subnets originally added to the collection.
+     *
+     * @return Subnet[]
+     */
+    public function getInputSubnets() : array
+    {
+        return $this->inputSubnets;
+    }
+
+    /**
+     * Returns array of Subnets originally added to collection within array of Subnets that are covering it.
+     *
+     * @return array array is indexed with input Subnets unique indexes and contains following fields:
+     *                  'inputSubnet' - originally added Subnet
+     *                  'coveringSubnets' - array of Subnets that are covering 'inputSubnet'
+     *                  example:
+     *                  $result = [
+     *                      '1.1.1.1/10-xyz' => [
+     *                          'inputSubnet' => InputSubnet
+     *                          'coveringSubnets' => [
+     *                              '1.1.1.1/10-xyz' => CoveringSubnet
+     *                          ]
+     *                      ]
+     *                  ]
+     */
+    public function getInputSubnetsWithCoveringSubnets() : array
+    {
+        $result = [];
+        $inputSubnets = $this->getInputSubnets();
+
+        foreach ($inputSubnets as $inputSubnet) {
+            $result[$inputSubnet->getIndex()] = ['inputSubnet' => $inputSubnet, 'coveringSubnets' => []];
+        }
+
+        foreach ($this->getDistinctSubnets() as $subnet) {
+            if (isset($this->inputSubnets[$subnet->getIndex()])) {
+                $result[$subnet->getIndex()]['coveringSubnets'][$subnet->getIndex()] = $subnet;
+            }
+        }
+
+        foreach ($this->getOverlappingSubnetsCollection()->getOverlappingSubnets() as $overlappingSubnets) {
+            foreach ($overlappingSubnets->getCoveredSubnets() as $coveredSubnet) {
+                if (isset($this->inputSubnets[$coveredSubnet->getIndex()])) {
+                    foreach ($overlappingSubnets->getDistinctSubnets() as $subnet) {
+                        $result[$coveredSubnet->getIndex()]['coveringSubnets'][$subnet->getIndex()] = $subnet;
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
 }
